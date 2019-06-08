@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MiniArgParse
 {
@@ -58,8 +59,10 @@ namespace MiniArgParse
                 else if (argument.Action == null || argument.Action == "single")
                 {
                     string key = argument.Name.TrimStart('-');
-                    string value = argsList.Count < 2 ? null : argsList[1];
 
+                    var valueIndex = argIndex + 1;
+                    var value = valueIndex >= argsList.Count ? null : argsList[valueIndex];
+                    
                     if (value == null || value.StartsWith("-"))
                     {
                         throw new ArgumentParseException($"Argument {argument}: expected one argument");
@@ -116,6 +119,45 @@ namespace MiniArgParse
         public void AddArgument(string name, string action = "single")
         {
             _arguments.Add(new Argument {Name = name, Action = action});
+        }
+
+        public string HelpText {
+            get {
+                var progName = AppDomain.CurrentDomain.FriendlyName;
+                var builder = new StringBuilder();
+                builder.AppendLine($"Usage: {progName} [OPTION]... [ARG]...");
+
+                var optionArgs = _arguments.FindAll(x => x.Name.StartsWith("-"));
+                var positionArgs = _arguments.FindAll(x => !x.Name.StartsWith("-"));
+
+                if (positionArgs.Count > 0)
+                {
+                    builder.AppendLine("\nPositional arguments:");
+                    foreach (var arg in positionArgs)
+                    {
+                        builder.AppendLine($"  {arg.Name}");
+                    }
+                }
+                
+                if (optionArgs.Count > 0)
+                {
+                    builder.AppendLine("\nOptional arguments:");
+                    foreach (var arg in optionArgs)
+                    {
+                        if (arg.Action == "toggle")
+                        {
+                            builder.AppendLine($"  {arg.Name}");
+                        }
+                        else
+                        {
+                            var key = arg.Name.TrimStart('-').ToUpper();
+                            builder.AppendLine($"  {arg.Name} {key}");
+                        }
+                    }
+                }
+
+                return builder.ToString().TrimEnd('\n');
+            }
         }
     }
 }

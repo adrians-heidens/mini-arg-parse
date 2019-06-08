@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MiniArgParse;
 
 namespace MiniArgParse.Example
@@ -13,6 +14,12 @@ namespace MiniArgParse.Example
             parser.AddArgument(name: "--bar", action: "toggle"); // Boolean.
             parser.AddArgument(name: "spam"); // Positional string value 1.
             parser.AddArgument(name: "eggs"); // Position string value 2.
+
+            if (args.Contains("--help"))
+            {
+                Console.WriteLine(parser.HelpText);
+                Environment.Exit(0);
+            }
 
             IDictionary<string, dynamic> parsedArgs = null;
             try

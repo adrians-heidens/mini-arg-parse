@@ -147,5 +147,17 @@ namespace MiniArgParse.Test
             parser.AddArgument(name: "--bar", action: "toggle");
             var args = parser.ParseArgs(new string[] {"--bar", "1"});
         }
+
+        [TestMethod]
+        public void OptionalAfterPositional()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument(name: "foo");
+            parser.AddArgument(name: "--bar");
+            var args = parser.ParseArgs(new string[] {"1", "--bar", "2"});
+            Assert.AreEqual(2, args.Count);
+            Assert.AreEqual("1", args["foo"]);
+            Assert.AreEqual("2", args["bar"]);
+        }
     }
 }
