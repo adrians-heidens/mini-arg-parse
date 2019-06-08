@@ -1,60 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MiniArgParse
 {
     public class ArgumentParser
     {
-        private List<string> _arguments = new List<string>();
+        class Argument {
+            public string Name { get; set; }
 
-        public IDictionary<string, string> ParseArgs(string[] args)
+            public string Action { get; set; }
+        }
+
+        private List<Argument> _arguments = new List<Argument>();
+
+        public IDictionary<string, dynamic> ParseArgs(string[] args)
         {
-            Console.WriteLine($"Parsing args: '{string.Join(", ", args)}'.");
+            var optionArgs = _arguments.FindAll(x => x.Name.StartsWith("-"));
+            var positionArgs = _arguments.FindAll(x => !x.Name.StartsWith("-"));
 
-            var parsedArgs = new Dictionary<string, string>();
-
-            var optionArgs = _arguments.FindAll(x => x.StartsWith("-"));
-            var positionArgs = _arguments.FindAll(x => !x.StartsWith("-"));
+            // Create parsed args dict and set default values.
+            var parsedArgs = new Dictionary<string, dynamic>();
+            foreach (var arg in optionArgs)
+            {
+                if (arg.Action == "toggle")
+                {
+                    parsedArgs[arg.Name.TrimStart('-')] = false;
+                }
+                else {
+                    parsedArgs[arg.Name.TrimStart('-')] = null;
+                }
+            }
 
             var argsList = new List<string>(args);
             
-            // Go through options args, remove parsed params and args.
+            // Got through args in sequence and look for optional ones,
+            // remove processed args.
             var argIndex = 0;
-            while (argIndex < optionArgs.Count)
+            while (argIndex < argsList.Count)
             {
-                var argument = optionArgs[argIndex];
-                
-                parsedArgs[argument.TrimStart('-')] = null;
+                var argName = argsList[argIndex];
+                var argument = optionArgs.Find(x => x.Name == argName);
 
-                var i = argsList.IndexOf(argument);
-                if (i == -1)
+                if (argument == null)
                 {
                     argIndex += 1;
                     continue;
                 }
-
-                optionArgs.RemoveAt(argIndex);
-
-                if (argsList.Count < i + 2)
-                {
-                    throw new ArgumentParseException($"Argument {argument}: expected one argument");
-                }
-
-                string key = argument.TrimStart('-');
-                string value = argsList[i + 1];
-
-                if (value.StartsWith("-"))
-                {
-                    throw new ArgumentParseException($"Argument {argument}: expected one argument");
-                }
-
-                argsList.RemoveAt(i);
-                argsList.RemoveAt(i);
                 
-                parsedArgs[key] = value;
+                if (argument.Action == "toggle")
+                {
+                    string key = argument.Name.TrimStart('-');
+                    argsList.RemoveAt(argIndex);
+                    parsedArgs[key] = true;
+                }
+
+                else if (argument.Action == null || argument.Action == "single")
+                {
+                    string key = argument.Name.TrimStart('-');
+                    string value = argsList.Count < 2 ? null : argsList[1];
+
+                    if (value == null || value.StartsWith("-"))
+                    {
+                        throw new ArgumentParseException($"Argument {argument}: expected one argument");
+                    }
+
+                    argsList.RemoveAt(argIndex);
+                    argsList.RemoveAt(argIndex);
+                    
+                    parsedArgs[key] = value;
+                }
+
+                else
+                {
+                    throw new Exception($"Unexpected argument action: {argument.Action}");
+                }                
             }
 
-            // Go through positional args.
+            // Go through positional args and set values.
             argIndex = 0;
             while (positionArgs.Count > argIndex && argsList.Count > argIndex)
             {
@@ -66,7 +89,7 @@ namespace MiniArgParse
                 }
 
                 var argument = positionArgs[argIndex];
-                parsedArgs[argument] = value;
+                parsedArgs[argument.Name] = value;
                 
                 argsList.RemoveAt(argIndex);
                 positionArgs.RemoveAt(argIndex);
@@ -75,7 +98,7 @@ namespace MiniArgParse
             // Report if positional missing.
             if (positionArgs.Count > 0)
             {
-                var a = string.Join(", ", positionArgs);
+                var a = string.Join(", ", positionArgs.Select(x => x.Name));
                 var m = $"the following arguments are required: {a}";
                 throw new ArgumentParseException(m);
             }
@@ -90,10 +113,9 @@ namespace MiniArgParse
             return parsedArgs;
         }
 
-        public void AddArgument(string name)
+        public void AddArgument(string name, string action = "single")
         {
-            Console.WriteLine($"Adding argument '{name}'.");
-            _arguments.Add(name);
+            _arguments.Add(new Argument {Name = name, Action = action});
         }
     }
 }

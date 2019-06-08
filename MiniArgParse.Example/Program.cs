@@ -9,12 +9,12 @@ namespace MiniArgParse.Example
         static void Main(string[] args)
         {
             var parser = new ArgumentParser();
-            parser.AddArgument(name: "--foo");
-            parser.AddArgument(name: "--bar");
-            parser.AddArgument(name: "spam");
-            parser.AddArgument(name: "eggs");
+            parser.AddArgument(name: "--foo"); // Single string value.
+            parser.AddArgument(name: "--bar", action: "toggle"); // Boolean.
+            parser.AddArgument(name: "spam"); // Positional string value 1.
+            parser.AddArgument(name: "eggs"); // Position string value 2.
 
-            IDictionary<string, string> parsedArgs = null;
+            IDictionary<string, dynamic> parsedArgs = null;
             try
             {
                 parsedArgs = parser.ParseArgs(args);

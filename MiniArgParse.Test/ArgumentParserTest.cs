@@ -92,5 +92,60 @@ namespace MiniArgParse.Test
 
             var args = parser.ParseArgs(new string[] {});
         }
+
+        [TestMethod]
+        public void ToggleOptionEnabled()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument(name: "--bar", action: "toggle");
+
+            var args = parser.ParseArgs(new string[] {"--bar"});
+            Assert.AreEqual(1, args.Count);
+            Assert.IsTrue(args.ContainsKey("bar"));
+            Assert.AreEqual(true, args["bar"]);
+        }
+
+        [TestMethod]
+        public void ToggleOptionDisabled()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument(name: "--bar", action: "toggle");
+
+            var args = parser.ParseArgs(new string[] {});
+            Assert.AreEqual(1, args.Count);
+            Assert.IsTrue(args.ContainsKey("bar"));
+            Assert.AreEqual(false, args["bar"]);
+        }
+
+        [TestMethod]
+        public void OptionRepeatOverrides()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument(name: "--bar", action: "single");
+
+            var args = parser.ParseArgs(new string[] {"--bar", "1", "--bar", "2"});
+            Assert.AreEqual(1, args.Count);
+            Assert.AreEqual("2", args["bar"]);
+        }
+
+        [TestMethod]
+        public void ToggleOptionRepeatDoesNothing()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument(name: "--bar", action: "toggle");
+
+            var args = parser.ParseArgs(new string[] {"--bar", "--bar"});
+            Assert.AreEqual(1, args.Count);
+            Assert.AreEqual(true, args["bar"]);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentParseException))]
+        public void ToggleOptionWithValueIsError()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument(name: "--bar", action: "toggle");
+            var args = parser.ParseArgs(new string[] {"--bar", "1"});
+        }
     }
 }
