@@ -1,0 +1,9 @@
+MiniArgParse/obj/
+MiniArgParse/bin/
+
+MiniArgParse.Test/bin/
+MiniArgParse.Test/obj/
+MiniArgParse.Test/TestResults/
+
+MiniArgParse.Example/bin/
+MiniArgParse.Example/obj/
