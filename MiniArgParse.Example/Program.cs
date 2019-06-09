@@ -9,11 +9,32 @@ namespace MiniArgParse.Example
     {
         static void Main(string[] args)
         {
-            var parser = new ArgumentParser();
-            parser.AddArgument(name: "--foo"); // Single string value.
-            parser.AddArgument(name: "--bar", action: "toggle"); // Boolean.
-            parser.AddArgument(name: "spam"); // Positional string value 1.
-            parser.AddArgument(name: "eggs"); // Position string value 2.
+            var parser = new ArgumentParser
+            {
+                Description = "Example argument parsing program."
+            };
+
+            // Single string value.
+            parser.AddArgument(
+                name: "--foo",
+                help: "Foo help.");
+            
+            // Long name parameter.
+            parser.AddArgument(
+                name: "--long-name-param",
+                help: "Long named parameter.");
+
+            // Boolean.
+            parser.AddArgument(
+                name: "--bar",
+                action: "toggle",
+                help: "Help on bar."); 
+
+            // Positional string value 1.
+            parser.AddArgument(name: "spam", help: "The spam argument.");
+
+            // Position string value 2.
+            parser.AddArgument(name: "eggs", help: "Some help on eggs."); 
 
             if (args.Contains("--help"))
             {

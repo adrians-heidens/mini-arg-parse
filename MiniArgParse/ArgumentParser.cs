@@ -11,7 +11,19 @@ namespace MiniArgParse
             public string Name { get; set; }
 
             public string Action { get; set; }
+
+            public string Help { get; set; }
+
+            public bool IsPositional
+            {
+                get
+                {
+                    return !Name.StartsWith("-");
+                }
+            }
         }
+
+        public string Description { get; set; }
 
         private List<Argument> _arguments = new List<Argument>();
 
@@ -116,9 +128,33 @@ namespace MiniArgParse
             return parsedArgs;
         }
 
-        public void AddArgument(string name, string action = "single")
+        public void AddArgument(string name, string action = "single", string help = "")
         {
-            _arguments.Add(new Argument {Name = name, Action = action});
+            _arguments.Add(new Argument {Name = name, Action = action, Help = help});
+        }
+
+        private void AddArgumentHelp(StringBuilder builder, Argument argument)
+        {
+            string argSpec = null;
+            if (argument.Action == "toggle" || argument.IsPositional)
+            {
+                argSpec = argument.Name;
+            }
+            else
+            {
+                var key = argument.Name.TrimStart('-').ToUpper();
+                argSpec = $"{argument.Name} {key}";
+            }
+
+            if (argSpec.Length >= 12)
+            {
+                builder.AppendLine($"  {argSpec,-12}");
+                builder.AppendLine($"               {argument.Help}");
+            }
+            else
+            {
+                builder.AppendLine($"  {argSpec,-12} {argument.Help}");
+            }
         }
 
         public string HelpText {
@@ -126,6 +162,11 @@ namespace MiniArgParse
                 var progName = AppDomain.CurrentDomain.FriendlyName;
                 var builder = new StringBuilder();
                 builder.AppendLine($"Usage: {progName} [OPTION]... [ARG]...");
+
+                if (Description != null)
+                {
+                    builder.AppendLine($"\n{Description}");
+                }
 
                 var optionArgs = _arguments.FindAll(x => x.Name.StartsWith("-"));
                 var positionArgs = _arguments.FindAll(x => !x.Name.StartsWith("-"));
@@ -135,7 +176,7 @@ namespace MiniArgParse
                     builder.AppendLine("\nPositional arguments:");
                     foreach (var arg in positionArgs)
                     {
-                        builder.AppendLine($"  {arg.Name}");
+                        AddArgumentHelp(builder, arg);
                     }
                 }
                 
@@ -144,15 +185,7 @@ namespace MiniArgParse
                     builder.AppendLine("\nOptional arguments:");
                     foreach (var arg in optionArgs)
                     {
-                        if (arg.Action == "toggle")
-                        {
-                            builder.AppendLine($"  {arg.Name}");
-                        }
-                        else
-                        {
-                            var key = arg.Name.TrimStart('-').ToUpper();
-                            builder.AppendLine($"  {arg.Name} {key}");
-                        }
+                        AddArgumentHelp(builder, arg);
                     }
                 }
 
