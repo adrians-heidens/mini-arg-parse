@@ -30,6 +30,12 @@ namespace MiniArgParse.Example
                 action: "toggle",
                 help: "Help on bar."); 
 
+            // A list.
+            parser.AddArgument(
+                name: "--list-one",
+                action: "list",
+                help: "A list parameter.");
+
             // Positional string value 1.
             parser.AddArgument(name: "spam", help: "The spam argument.");
 
@@ -55,7 +61,16 @@ namespace MiniArgParse.Example
             
             foreach (var entry in parsedArgs)
             {
-                Console.WriteLine($"> '{entry.Key}': '{entry.Value}'");
+                if (entry.Value is IList<string>)
+                {
+                    var s = string.Join(", ", entry.Value as IList<string>);
+                    Console.WriteLine($"> '{entry.Key}': '{s}'");
+                }
+                else
+                {
+                    Console.WriteLine($"> '{entry.Key}': '{entry.Value}'");
+                }
+                
             }
         }
     }

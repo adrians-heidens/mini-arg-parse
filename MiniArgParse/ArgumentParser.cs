@@ -68,6 +68,23 @@ namespace MiniArgParse
                     parsedArgs[key] = true;
                 }
 
+                else if (argument.Action == "list")
+                {
+                    string key = argument.Name.TrimStart('-');
+                    var value = new List<string>();
+                    parsedArgs[key] = value;
+                    argsList.RemoveAt(argIndex);
+                    while (argIndex < argsList.Count)
+                    {
+                        if (argsList[argIndex].StartsWith("-"))
+                        {
+                            break;
+                        }
+                        value.Add(argsList[argIndex]);
+                        argsList.RemoveAt(argIndex);
+                    }
+                }
+
                 else if (argument.Action == null || argument.Action == "single")
                 {
                     string key = argument.Name.TrimStart('-');
@@ -135,10 +152,16 @@ namespace MiniArgParse
 
         private void AddArgumentHelp(StringBuilder builder, Argument argument)
         {
+            const int indent = 15;
             string argSpec = null;
             if (argument.Action == "toggle" || argument.IsPositional)
             {
                 argSpec = argument.Name;
+            }
+            else if (argument.Action == "list")
+            {
+                var key = argument.Name.TrimStart('-').ToUpper();
+                argSpec = $"{argument.Name} [{key} [{key} ...]]";
             }
             else
             {
@@ -146,14 +169,14 @@ namespace MiniArgParse
                 argSpec = $"{argument.Name} {key}";
             }
 
-            if (argSpec.Length >= 12)
+            if (argSpec.Length >= indent)
             {
-                builder.AppendLine($"  {argSpec,-12}");
-                builder.AppendLine($"               {argument.Help}");
+                builder.AppendLine($"  {argSpec,-indent}");
+                builder.AppendLine($"  {new string(' ', indent)} {argument.Help}");
             }
             else
             {
-                builder.AppendLine($"  {argSpec,-12} {argument.Help}");
+                builder.AppendLine($"  {argSpec,-indent} {argument.Help}");
             }
         }
 

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiniArgParse;
+using System.Linq;
 
 namespace MiniArgParse.Test
 {
@@ -158,6 +160,20 @@ namespace MiniArgParse.Test
             Assert.AreEqual(2, args.Count);
             Assert.AreEqual("1", args["foo"]);
             Assert.AreEqual("2", args["bar"]);
+        }
+
+        [TestMethod]
+        public void ListOption()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument(name: "--foo", action: "list");
+            parser.AddArgument(name: "--bar", action: "single");
+            var args = parser.ParseArgs(new string[] {"--foo", "1", "2", "--bar", "3"});
+            Assert.AreEqual(2, args.Count);
+            Assert.IsTrue(args["foo"] is IList<string>);
+
+            var l = args["foo"] as IList<string>;
+            Assert.IsTrue(l.SequenceEqual(new List<string> {"1", "2"}));
         }
     }
 }
