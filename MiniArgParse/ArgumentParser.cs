@@ -94,7 +94,7 @@ namespace MiniArgParse
                     
                     if (value == null || value.StartsWith("-"))
                     {
-                        throw new ArgumentParseException($"Argument {argument}: expected one argument");
+                        throw new ArgumentParseException($"Argument {argument.Name}: expected one argument");
                     }
 
                     argsList.RemoveAt(argIndex);
