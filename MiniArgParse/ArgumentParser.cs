@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MiniArgParse.Arguments;
 
 namespace MiniArgParse
 {
@@ -45,52 +46,7 @@ namespace MiniArgParse
                     continue;
                 }
                 
-                if (argument.Action == "toggle")
-                {
-                    string key = argument.Name.TrimStart('-');
-                    argsList.RemoveAt(argIndex);
-                    parsedArgs[key] = true;
-                }
-
-                else if (argument.Action == "list")
-                {
-                    string key = argument.Name.TrimStart('-');
-                    var value = new List<string>();
-                    parsedArgs[key] = value;
-                    argsList.RemoveAt(argIndex);
-                    while (argIndex < argsList.Count)
-                    {
-                        if (argsList[argIndex].StartsWith("-"))
-                        {
-                            break;
-                        }
-                        value.Add(argsList[argIndex]);
-                        argsList.RemoveAt(argIndex);
-                    }
-                }
-
-                else if (argument.Action == null || argument.Action == "single")
-                {
-                    string key = argument.Name.TrimStart('-');
-
-                    var valueIndex = argIndex + 1;
-                    var value = valueIndex >= argsList.Count ? null : argsList[valueIndex];
-                    
-                    if (value == null || value.StartsWith("-"))
-                    {
-                        throw new ArgumentParseException($"Argument {argument.Name}: expected one argument");
-                    }
-
-                    argsList.RemoveAt(argIndex);
-                    argsList.RemoveAt(argIndex);
-                    
-                    parsedArgs[key] = value;
-                }
-
-                else
-                {
-                    throw new Exception($"Unexpected argument action: {argument.Action}");
-                }                
+                argument.Parse(argIndex, argsList, parsedArgs);
             }
 
             // Go through positional args and set values.
@@ -131,10 +87,25 @@ namespace MiniArgParse
 
         public void AddArgument(string name, string action = "single", string help = "")
         {
-            _arguments.Add(new Argument {Name = name, Action = action, Help = help});
+            if (action == null || action == "single")
+            {
+                _arguments.Add(new SingleValueArgument {Name = name, Action = action, Help = help});
+            }
+            else if (action == "list")
+            {
+                _arguments.Add(new ListArgument {Name = name, Action = action, Help = help});
+            }
+            else if (action == "toggle")
+            {
+                _arguments.Add(new ToggleArgument {Name = name, Action = action, Help = help});
+            }
+            else
+            {
+                throw new Exception($"Unexpected action: '{action}'");
+            }
         }
 
-        private void AddArgumentHelp(StringBuilder builder, Argument argument)
+        private void AddArgumentHelp(StringBuilder builder, IArgument argument)
         {
             const int indent = 15;
             string argSpec = null;

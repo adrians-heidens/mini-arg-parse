@@ -1,16 +1,17 @@
 using System.Collections.Generic;
+using MiniArgParse.Arguments;
 
 namespace MiniArgParse
 {
     class ArgumentCollection
     {
-        private List<Argument> _arguments = new List<Argument>();
+        private List<IArgument> _arguments = new List<IArgument>();
 
-        public List<Argument> OptionArgs => _arguments.FindAll(x => x.Name.StartsWith("-"));
+        public List<IArgument> OptionArgs => _arguments.FindAll(x => x.Name.StartsWith("-"));
 
-        public List<Argument> PositionArgs => _arguments.FindAll(x => !x.Name.StartsWith("-"));
+        public List<IArgument> PositionArgs => _arguments.FindAll(x => !x.Name.StartsWith("-"));
 
-        public void Add(Argument argument)
+        public void Add(IArgument argument)
         {
             _arguments.Add(argument);
         }
