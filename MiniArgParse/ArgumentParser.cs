@@ -7,30 +7,14 @@ namespace MiniArgParse
 {
     public class ArgumentParser
     {
-        class Argument {
-            public string Name { get; set; }
-
-            public string Action { get; set; }
-
-            public string Help { get; set; }
-
-            public bool IsPositional
-            {
-                get
-                {
-                    return !Name.StartsWith("-");
-                }
-            }
-        }
-
         public string Description { get; set; }
 
-        private List<Argument> _arguments = new List<Argument>();
+        private ArgumentCollection _arguments = new ArgumentCollection();
 
         public IDictionary<string, dynamic> ParseArgs(string[] args)
         {
-            var optionArgs = _arguments.FindAll(x => x.Name.StartsWith("-"));
-            var positionArgs = _arguments.FindAll(x => !x.Name.StartsWith("-"));
+            var optionArgs = _arguments.OptionArgs;
+            var positionArgs = _arguments.PositionArgs;
 
             // Create parsed args dict and set default values.
             var parsedArgs = new Dictionary<string, dynamic>();
@@ -191,8 +175,8 @@ namespace MiniArgParse
                     builder.AppendLine($"\n{Description}");
                 }
 
-                var optionArgs = _arguments.FindAll(x => x.Name.StartsWith("-"));
-                var positionArgs = _arguments.FindAll(x => !x.Name.StartsWith("-"));
+                var optionArgs = _arguments.OptionArgs;
+                var positionArgs = _arguments.PositionArgs;
 
                 if (positionArgs.Count > 0)
                 {
