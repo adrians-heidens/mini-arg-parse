@@ -35,30 +35,54 @@ namespace MiniArgParse.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentParseException))]
         public void OptionWithNonValue()
         {
             var parser = new ArgumentParser();
             parser.AddArgument(name: "--foo");
-            var args = parser.ParseArgs(new string[] {"--foo", "--bar"});
+
+            try
+            {
+                var args = parser.ParseArgs(new string[] {"--foo", "--bar"});
+                Assert.Fail("ArgumentParseException expected");
+            }
+            catch (ArgumentParseException e)
+            {
+                Assert.AreEqual("Argument --foo: expected one argument", e.Message);
+            }
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentParseException))]
         public void OptionWithMissingValue()
         {
             var parser = new ArgumentParser();
             parser.AddArgument(name: "--foo");
-            var args = parser.ParseArgs(new string[] {"--foo"});
+
+            try
+            {
+                var args = parser.ParseArgs(new string[] {"--foo"});
+                Assert.Fail("ArgumentParseException expected");
+            }
+            catch (ArgumentParseException e)
+            {
+                Assert.AreEqual("Argument --foo: expected one argument", e.Message);
+            }
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentParseException))]
         public void UnknownOption()
         {
             var parser = new ArgumentParser();
             parser.AddArgument(name: "--foo");
-            var args = parser.ParseArgs(new string[] {"--bar", "2"});
+
+            try
+            {
+                var args = parser.ParseArgs(new string[] {"--bar", "2"});
+                Assert.Fail("ArgumentParseException expected");
+            }
+            catch (ArgumentParseException e)
+            {
+                Assert.AreEqual("Unrecognized arguments: --bar 2", e.Message);
+            }
         }
 
         [TestMethod]
@@ -76,23 +100,37 @@ namespace MiniArgParse.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentParseException))]
         public void PositionalNoneValue()
         {
             var parser = new ArgumentParser();
             parser.AddArgument(name: "bar");
 
-            var args = parser.ParseArgs(new string[] {"--foo"});
+            try
+            {
+                var args = parser.ParseArgs(new string[] {"--foo"});
+                Assert.Fail("ArgumentParseException expected");
+            }
+            catch (ArgumentParseException e)
+            {
+                Assert.AreEqual("the following arguments are required: bar", e.Message);
+            }
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentParseException))]
         public void PositionalMissing()
         {
             var parser = new ArgumentParser();
             parser.AddArgument(name: "bar");
 
-            var args = parser.ParseArgs(new string[] {});
+            try
+            {
+                var args = parser.ParseArgs(new string[] {});
+                Assert.Fail("ArgumentParseException expected");
+            }
+            catch (ArgumentParseException e)
+            {
+                Assert.AreEqual("the following arguments are required: bar", e.Message);
+            }
         }
 
         [TestMethod]
@@ -142,12 +180,20 @@ namespace MiniArgParse.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentParseException))]
         public void ToggleOptionWithValueIsError()
         {
             var parser = new ArgumentParser();
             parser.AddArgument(name: "--bar", action: "toggle");
-            var args = parser.ParseArgs(new string[] {"--bar", "1"});
+            
+            try 
+            {
+                var args = parser.ParseArgs(new string[] {"--bar", "1"});
+                Assert.Fail("ArgumentParseException expected");
+            }
+            catch (ArgumentParseException e)
+            {
+                Assert.AreEqual("Unrecognized arguments: 1", e.Message);
+            }
         }
 
         [TestMethod]

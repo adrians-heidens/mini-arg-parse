@@ -31,8 +31,8 @@ namespace MiniArgParse
             }
 
             var argsList = new List<string>(args);
-            
-            // Got through args in sequence and look for optional ones,
+
+            // Got through args in sequence and look for arguments,
             // remove processed args.
             var argIndex = 0;
             while (argIndex < argsList.Count)
@@ -40,31 +40,32 @@ namespace MiniArgParse
                 var argName = argsList[argIndex];
                 var argument = optionArgs.Find(x => x.Name == argName);
 
-                if (argument == null)
+                if (argument != null)
                 {
-                    argIndex += 1;
+                    argument.Parse(argIndex, argsList, parsedArgs);
                     continue;
                 }
-                
-                argument.Parse(argIndex, argsList, parsedArgs);
-            }
 
-            // Go through positional args and set values.
-            argIndex = 0;
-            while (positionArgs.Count > argIndex && argsList.Count > argIndex)
-            {
-                var value = argsList[argIndex];
-                if (value.StartsWith("-"))
+                // This should be position arg.
+
+                if (argName.StartsWith("-")) // Unrecognized arg.
                 {
                     argIndex += 1;
                     continue;
                 }
 
-                var argument = positionArgs[argIndex];
-                parsedArgs[argument.Name] = value;
-                
-                argsList.RemoveAt(argIndex);
-                positionArgs.RemoveAt(argIndex);
+                if (positionArgs.Count > 0) // Positional arg.
+                {
+                    argument = positionArgs[0];
+                    parsedArgs[argument.Name] = argName;
+
+                    argsList.RemoveAt(argIndex);
+                    positionArgs.RemoveAt(argIndex);
+                }
+                else
+                {
+                    argIndex += 1;
+                }                
             }
 
             // Report if positional missing.
