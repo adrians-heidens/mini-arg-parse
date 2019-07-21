@@ -12,6 +12,9 @@ namespace MiniArgParse
 
         private ArgumentCollection _arguments = new ArgumentCollection();
 
+        private Dictionary<string, ArgumentParser> _subParsers =
+            new Dictionary<string, ArgumentParser>();
+
         public IDictionary<string, dynamic> ParseArgs(string[] args)
         {
             var optionArgs = _arguments.OptionArgs;
@@ -57,6 +60,24 @@ namespace MiniArgParse
                 if (positionArgs.Count > 0) // Positional arg.
                 {
                     argument = positionArgs[0];
+
+                    if (argument.Name == "command")
+                    {
+                        var commandName = argName;
+                        var subParser = _subParsers[commandName];
+
+                        argsList.RemoveAt(argIndex);
+                        positionArgs.RemoveAt(argIndex);
+
+                        var o = subParser.ParseArgs(argsList.ToArray());
+
+                        foreach (var entry in o)
+                        {
+                            parsedArgs[entry.Key] = entry.Value;
+                        }
+                        return parsedArgs;
+                    }
+
                     parsedArgs[argument.Name] = argName;
 
                     argsList.RemoveAt(argIndex);
@@ -84,6 +105,11 @@ namespace MiniArgParse
             }
 
             return parsedArgs;
+        }
+
+        public void AddSubparser(string name, ArgumentParser subParser)
+        {
+            _subParsers.Add(name, subParser);
         }
 
         public void AddArgument(string name, string action = "single", string help = "")
@@ -134,6 +160,12 @@ namespace MiniArgParse
             {
                 builder.AppendLine($"  {argSpec,-indent} {argument.Help}");
             }
+        }
+
+        public SubParsers AddSubparsers(string help)
+        {
+            AddArgument("command", help: help);
+            return new SubParsers(this);
         }
 
         public string HelpText {

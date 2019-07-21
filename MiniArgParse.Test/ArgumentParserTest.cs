@@ -221,5 +221,30 @@ namespace MiniArgParse.Test
             var l = args["foo"] as IList<string>;
             Assert.IsTrue(l.SequenceEqual(new List<string> {"1", "2"}));
         }
+
+        [TestMethod]
+        public void SubParsers()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument("--foo", action: "toggle", help: "foo help");
+
+            var subparsers = parser.AddSubparsers(help: "sub-command help");
+
+            var parserA = subparsers.AddParser("a", help: "a help");
+            parserA.AddArgument("bar", "single", help: "bar help");
+
+            var parserB = subparsers.AddParser("b", help: "b help");
+            parserB.AddArgument("--baz", "single", help: "baz help");
+
+            var args = parser.ParseArgs(new string[] {"--foo", "b", "--baz", "1"});
+            Assert.AreEqual(2, args.Count);
+            Assert.AreEqual(true, args["foo"]);
+            Assert.AreEqual("1", args["baz"]);
+
+            args = parser.ParseArgs(new string[] {"--foo", "a", "1"});
+            Assert.AreEqual(2, args.Count);
+            Assert.AreEqual(true, args["foo"]);
+            Assert.AreEqual("1", args["bar"]);
+        }
     }
 }
