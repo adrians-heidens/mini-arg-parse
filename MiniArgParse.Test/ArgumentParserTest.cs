@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiniArgParse;
 using System.Linq;
+using System.IO;
 
 namespace MiniArgParse.Test
 {
@@ -298,6 +299,38 @@ namespace MiniArgParse.Test
 
             args = parser.ParseArgs(new string[] {"--foo", "a", "1"});
             Assert.AreEqual("FuncA()", args["func"]);
+        }
+
+        [TestMethod]
+        public void HelpTextMinimal()
+        {
+            var parser = new ArgumentParser();
+            parser.ProgName = "prog";
+            Assert.AreEqual("Usage: prog [OPTION]... [ARG]...", parser.HelpText);
+        }
+
+        [TestMethod]
+        public void HelpTextWithArguments()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument("--foo", help: "foo help");
+            parser.AddArgument("--bar", action: "toggle", help: "bar help");
+            parser.AddArgument("spam", action: "single", help: "spam help");
+            parser.ProgName = "prog";
+            parser.Description = "This is prog description.";
+
+            var expected = @"Usage: prog [OPTION]... [ARG]...
+
+This is prog description.
+
+Positional arguments:
+  spam            spam help
+
+Optional arguments:
+  --foo FOO       foo help
+  --bar           bar help".Replace("\r", string.Empty);
+
+            Assert.AreEqual(expected, parser.HelpText);
         }
     }
 }

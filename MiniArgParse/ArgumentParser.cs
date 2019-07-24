@@ -18,6 +18,8 @@ namespace MiniArgParse
         private Dictionary<string, dynamic> _defaults =
             new Dictionary<string, dynamic>();
 
+        public string ProgName { get; set; } = AppDomain.CurrentDomain.FriendlyName;
+
         public IDictionary<string, dynamic> ParseArgs(string[] args)
         {
             var optionArgs = _arguments.OptionArgs;
@@ -165,12 +167,12 @@ namespace MiniArgParse
 
             if (argSpec.Length >= indent)
             {
-                builder.AppendLine($"  {argSpec,-indent}");
-                builder.AppendLine($"  {new string(' ', indent)} {argument.Help}");
+                builder.AppendLine($"  {argSpec,-indent}".TrimEnd());
+                builder.AppendLine($"  {new string(' ', indent)} {argument.Help}".TrimEnd());
             }
             else
             {
-                builder.AppendLine($"  {argSpec,-indent} {argument.Help}");
+                builder.AppendLine($"  {argSpec,-indent} {argument.Help}".TrimEnd());
             }
         }
 
@@ -182,9 +184,8 @@ namespace MiniArgParse
 
         public string HelpText {
             get {
-                var progName = AppDomain.CurrentDomain.FriendlyName;
                 var builder = new StringBuilder();
-                builder.AppendLine($"Usage: {progName} [OPTION]... [ARG]...");
+                builder.AppendLine($"Usage: {ProgName} [OPTION]... [ARG]...");
 
                 if (Description != null)
                 {
