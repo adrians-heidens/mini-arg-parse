@@ -15,6 +15,9 @@ namespace MiniArgParse
         private Dictionary<string, ArgumentParser> _subParsers =
             new Dictionary<string, ArgumentParser>();
 
+        private Dictionary<string, dynamic> _defaults =
+            new Dictionary<string, dynamic>();
+
         public IDictionary<string, dynamic> ParseArgs(string[] args)
         {
             var optionArgs = _arguments.OptionArgs;
@@ -31,6 +34,10 @@ namespace MiniArgParse
                 else {
                     parsedArgs[arg.Name.TrimStart('-')] = null;
                 }
+            }
+            foreach (var entry in _defaults)
+            {
+                parsedArgs[entry.Key] = entry.Value;
             }
 
             var argsList = new List<string>(args);
@@ -105,6 +112,11 @@ namespace MiniArgParse
             }
 
             return parsedArgs;
+        }
+
+        public void SetDefault(string name, dynamic value)
+        {
+            _defaults[name] = value;
         }
 
         public void AddSubparser(string name, ArgumentParser subParser)

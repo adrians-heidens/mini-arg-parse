@@ -246,5 +246,58 @@ namespace MiniArgParse.Test
             Assert.AreEqual(true, args["foo"]);
             Assert.AreEqual("1", args["bar"]);
         }
+
+        [TestMethod]
+        public void Defaults()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument("--foo", action: "single", help: "foo help");
+            parser.SetDefault("foo", "12");
+            parser.SetDefault("bar", "spam");
+
+            var args = parser.ParseArgs(new string[] {});
+
+            Assert.AreEqual(2, args.Count);
+            Assert.AreEqual("12", args["foo"]);
+            Assert.AreEqual("spam", args["bar"]);
+        }
+
+        [TestMethod]
+        public void OverrideDefaults()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument("--foo", action: "single", help: "foo help");
+            parser.SetDefault("foo", "12");
+            parser.SetDefault("bar", "spam");
+
+            var args = parser.ParseArgs(new string[] {"--foo", "a"});
+
+            Assert.AreEqual(2, args.Count);
+            Assert.AreEqual("a", args["foo"]);
+            Assert.AreEqual("spam", args["bar"]);
+        }
+
+        [TestMethod]
+        public void SubParserDefaults()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument("--foo", action: "toggle", help: "foo help");
+
+            var subparsers = parser.AddSubparsers(help: "sub-command help");
+
+            var parserA = subparsers.AddParser("a", help: "a help");
+            parserA.AddArgument("bar", "single", help: "bar help");
+            parserA.SetDefault("func", "FuncA()");
+
+            var parserB = subparsers.AddParser("b", help: "b help");
+            parserB.AddArgument("--baz", "single", help: "baz help");
+            parserB.SetDefault("func", "FuncB()");
+
+            var args = parser.ParseArgs(new string[] {"--foo", "b", "--baz", "1"});
+            Assert.AreEqual("FuncB()", args["func"]);
+
+            args = parser.ParseArgs(new string[] {"--foo", "a", "1"});
+            Assert.AreEqual("FuncA()", args["func"]);
+        }
     }
 }
