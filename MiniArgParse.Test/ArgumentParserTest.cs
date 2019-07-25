@@ -302,6 +302,31 @@ namespace MiniArgParse.Test
         }
 
         [TestMethod]
+        public void SubParserParentArgumentOrder()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument("--foo", action: "toggle", help: "foo help");
+
+            var subparsers = parser.AddSubparsers(help: "sub-command help");
+
+            var parserA = subparsers.AddParser("a", help: "a help");
+            parserA.AddArgument("bar", "single", help: "bar help");
+
+            var parserB = subparsers.AddParser("b", help: "b help");
+            parserB.AddArgument("--baz", "single", help: "baz help");
+
+            try
+            {
+                var args = parser.ParseArgs(new string[] {"a", "1", "--foo"});
+                Assert.Fail("ArgumentParseException expected");
+            }
+            catch (ArgumentParseException e)
+            {
+                Assert.AreEqual("Unrecognized arguments: --foo", e.Message);
+            }
+        }
+
+        [TestMethod]
         public void HelpTextMinimal()
         {
             var parser = new ArgumentParser();
