@@ -357,5 +357,43 @@ Optional arguments:
 
             Assert.AreEqual(expected, parser.HelpText);
         }
+
+        [TestMethod]
+        public void MultipleSubparsers()
+        {
+            var parser = new ArgumentParser();
+            parser.AddSubparsers(help: "Help 1");
+
+            try
+            {
+                parser.AddSubparsers(help: "Help 2");
+                Assert.Fail("ArgumentParseException expected");
+            }
+            catch (ArgumentParseException e)
+            {
+                Assert.AreEqual("cannot have multiple subparser arguments", e.Message);
+            }
+        }
+
+        [TestMethod]
+        public void SubParsersTwoLevels()
+        {
+            var parser = new ArgumentParser();
+            parser.AddArgument("--foo", action: "toggle", help: "foo help");
+
+            var subparsers1 = parser.AddSubparsers(help: "sub-command help");
+
+            var parserA = subparsers1.AddParser("a", help: "a help");
+            
+            var subparsers2 = parserA.AddSubparsers(help: "sub-command two help");
+
+            var parserB = subparsers2.AddParser("b", help: "b help");
+            parserB.AddArgument("--baz", "single", help: "baz help");
+
+            var args = parser.ParseArgs(new string[] {"--foo", "a", "b", "--baz", "2"});
+            Assert.AreEqual(2, args.Count);
+            Assert.AreEqual(true, args["foo"]);
+            Assert.AreEqual("2", args["baz"]);
+        }
     }
 }

@@ -178,6 +178,11 @@ namespace MiniArgParse
 
         public SubParsers AddSubparsers(string help)
         {
+            if (_arguments.HavePositionArgument("command"))
+            {
+                throw new ArgumentParseException("cannot have multiple subparser arguments");
+            }
+
             AddArgument("command", help: help);
             return new SubParsers(this);
         }

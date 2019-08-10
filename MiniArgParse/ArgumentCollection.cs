@@ -11,6 +11,12 @@ namespace MiniArgParse
 
         public List<IArgument> PositionArgs => _arguments.FindAll(x => !x.Name.StartsWith("-"));
 
+        public bool HavePositionArgument(string name)
+        {
+            var arg = PositionArgs.Find(x => x.Name == name);
+            return arg != null;
+        }
+
         public void Add(IArgument argument)
         {
             _arguments.Add(argument);
