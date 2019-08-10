@@ -44,58 +44,55 @@ namespace MiniArgParse
 
             var argsList = new List<string>(args);
 
+            var unrecognizedArgs = new List<string>();
+
             // Got through args in sequence and look for arguments,
             // remove processed args.
-            var argIndex = 0;
-            while (argIndex < argsList.Count)
+            while (argsList.Count() > 0)
             {
-                var argName = argsList[argIndex];
+                var argName = argsList[0];
                 var argument = optionArgs.Find(x => x.Name == argName);
 
                 if (argument != null)
                 {
-                    argument.Parse(argIndex, argsList, parsedArgs);
+                    argument.Parse(0, argsList, parsedArgs);
                     continue;
                 }
 
                 // This should be position arg.
 
-                if (argName.StartsWith("-")) // Unrecognized arg.
+                if (argName.StartsWith("-") || positionArgs.Count == 0) // Unrecognized arg.
                 {
-                    argIndex += 1;
+                    unrecognizedArgs.Add(argName);
+                    argsList.RemoveAt(0);
                     continue;
                 }
 
-                if (positionArgs.Count > 0) // Positional arg.
-                {
-                    argument = positionArgs[0];
+                // Positional arg.
+                
+                argument = positionArgs[0];
 
-                    if (argument.Name == "command")
+                if (argument.Name == "command")
+                {
+                    var commandName = argName;
+                    var subParser = _subParsers[commandName];
+
+                    argsList.RemoveAt(0);
+                    positionArgs.RemoveAt(0);
+
+                    var o = subParser.ParseArgs(argsList.ToArray());
+
+                    foreach (var entry in o)
                     {
-                        var commandName = argName;
-                        var subParser = _subParsers[commandName];
-
-                        argsList.RemoveAt(argIndex);
-                        positionArgs.RemoveAt(argIndex);
-
-                        var o = subParser.ParseArgs(argsList.ToArray());
-
-                        foreach (var entry in o)
-                        {
-                            parsedArgs[entry.Key] = entry.Value;
-                        }
-                        return parsedArgs;
+                        parsedArgs[entry.Key] = entry.Value;
                     }
-
-                    parsedArgs[argument.Name] = argName;
-
-                    argsList.RemoveAt(argIndex);
-                    positionArgs.RemoveAt(argIndex);
+                    return parsedArgs;
                 }
-                else
-                {
-                    argIndex += 1;
-                }                
+
+                parsedArgs[argument.Name] = argName;
+
+                argsList.RemoveAt(0);
+                positionArgs.RemoveAt(0);
             }
 
             // Report if positional missing.
@@ -107,9 +104,9 @@ namespace MiniArgParse
             }
 
             // Report error if left over args.
-            if (argsList.Count > 0)
+            if (unrecognizedArgs.Count > 0)
             {
-                var m = $"Unrecognized arguments: {string.Join(" ", argsList)}";
+                var m = $"Unrecognized arguments: {string.Join(" ", unrecognizedArgs)}";
                 throw new ArgumentParseException(m);
             }
 
