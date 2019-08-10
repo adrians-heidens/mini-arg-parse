@@ -9,8 +9,8 @@ namespace MiniArgParse.Example
     {
         static void Main(string[] args)
         {
-            BasicUsageExample.Run(args);
-            //SubCommandExample.Run(args);
+            //BasicUsageExample.Run(args);
+            SubCommandExample.Run(args);
         }
     }
 }

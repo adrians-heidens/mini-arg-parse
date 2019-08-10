@@ -8,7 +8,6 @@ namespace MiniArgParse.Example
     {
         public static void Run(string[] args)
         {
-            /*
             var parser = new ArgumentParser();
             parser.AddArgument("--foo", action: "toggle", help: "foo help");
 
@@ -49,7 +48,6 @@ namespace MiniArgParse.Example
                     Console.WriteLine($"> '{entry.Key}': '{entry.Value}'");
                 }
             }
-            */
         }
     }
 }

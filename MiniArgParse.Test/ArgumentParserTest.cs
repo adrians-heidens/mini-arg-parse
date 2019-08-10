@@ -359,7 +359,36 @@ Optional arguments:
         }
 
         [TestMethod]
-        public void MultipleSubparsers()
+        public void SubParserHelp()
+        {
+            var parser = new ArgumentParser();
+            parser.ProgName = "prog";
+            parser.Description = "This is prog description.";
+            parser.AddArgument("--foo", action: "toggle", help: "foo help");
+
+            var subParsers = parser.AddSubparsers(help: "sub-command help");
+
+            var parserA = subParsers.AddParser("a", help: "a help");
+            parserA.AddArgument("bar", "single", help: "bar help");
+
+            var parserB = subParsers.AddParser("b", help: "b help");
+            parserB.AddArgument("--baz", "single", help: "baz help");
+
+            var expected = @"Usage: prog [OPTION]... [ARG]...
+
+This is prog description.
+
+Positional arguments:
+  command         sub-command help
+
+Optional arguments:
+  --foo           foo help".Replace("\r", string.Empty);
+            
+            Assert.AreEqual(expected, parser.HelpText);
+        }
+
+        [TestMethod]
+        public void MultipleSubParsers()
         {
             var parser = new ArgumentParser();
             parser.AddSubparsers(help: "Help 1");
