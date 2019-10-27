@@ -4,21 +4,20 @@ namespace MiniArgParse.Arguments
 {
     class SingleValueArgument : ArgumentBase
     {
-        public override void Parse(int argIndex, List<string> argsList, Dictionary<string, dynamic> parsedArgs)
+        public override void Parse(ArgumentList argumentList, Dictionary<string, dynamic> parsedArgs)
         {
             string key = Name.TrimStart('-');
 
-            var valueIndex = argIndex + 1;
-            var value = valueIndex >= argsList.Count ? null : argsList[valueIndex];
+            var value = argumentList.PeekNext();
             
             if (value == null || value.StartsWith("-"))
             {
                 throw new ArgumentParseException($"Argument {Name}: expected one argument");
             }
 
-            argsList.RemoveAt(argIndex);
-            argsList.RemoveAt(argIndex);
-            
+            argumentList.DropOne();
+            argumentList.DropOne();
+
             parsedArgs[key] = value;
         }
     }

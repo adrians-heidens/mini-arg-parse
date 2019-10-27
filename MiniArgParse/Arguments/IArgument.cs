@@ -12,6 +12,6 @@ namespace MiniArgParse.Arguments
 
         bool IsPositional { get; }
 
-        void Parse(int argIndex, List<string> argsList, Dictionary<string, dynamic> parsedArgs);
+        void Parse(ArgumentList argumentList, Dictionary<string, dynamic> parsedArgs);
     }
 }

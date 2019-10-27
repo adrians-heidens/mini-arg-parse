@@ -41,21 +41,21 @@ namespace MiniArgParse
             {
                 parsedArgs[entry.Key] = entry.Value;
             }
-
-            var argsList = new List<string>(args);
+            
+            var argsList = new ArgumentList(args);
 
             var unrecognizedArgs = new List<string>();
 
             // Got through args in sequence and look for arguments,
             // remove processed args.
-            while (argsList.Count() > 0)
+            while (argsList.Any())
             {
-                var argName = argsList[0];
+                var argName = argsList.Peek();
                 var argument = optionArgs.Find(x => x.Name == argName);
 
                 if (argument != null)
                 {
-                    argument.Parse(0, argsList, parsedArgs);
+                    argument.Parse(argsList, parsedArgs);
                     continue;
                 }
 
@@ -64,7 +64,7 @@ namespace MiniArgParse
                 if (argName.StartsWith("-") || positionArgs.Count == 0) // Unrecognized arg.
                 {
                     unrecognizedArgs.Add(argName);
-                    argsList.RemoveAt(0);
+                    argsList.DropOne();
                     continue;
                 }
 
@@ -77,7 +77,7 @@ namespace MiniArgParse
                     var commandName = argName;
                     var subParser = _subParsers[commandName];
 
-                    argsList.RemoveAt(0);
+                    argsList.DropOne();
                     positionArgs.RemoveAt(0);
 
                     var o = subParser.ParseArgs(argsList.ToArray());
@@ -91,7 +91,7 @@ namespace MiniArgParse
 
                 parsedArgs[argument.Name] = argName;
 
-                argsList.RemoveAt(0);
+                argsList.DropOne();
                 positionArgs.RemoveAt(0);
             }
 

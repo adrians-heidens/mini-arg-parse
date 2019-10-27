@@ -4,20 +4,21 @@ namespace MiniArgParse.Arguments
 {
     class ListArgument : ArgumentBase
     {
-        public override void Parse(int argIndex, List<string> argsList, Dictionary<string, dynamic> parsedArgs)
+        public override void Parse(ArgumentList argumentList, Dictionary<string, dynamic> parsedArgs)
         {
             string key = Name.TrimStart('-');
             var value = new List<string>();
             parsedArgs[key] = value;
-            argsList.RemoveAt(argIndex);
-            while (argIndex < argsList.Count)
+            argumentList.DropOne();
+            while (argumentList.Any())
             {
-                if (argsList[argIndex].StartsWith("-"))
+                var v = argumentList.Peek();
+                if (v.StartsWith("-"))
                 {
                     break;
                 }
-                value.Add(argsList[argIndex]);
-                argsList.RemoveAt(argIndex);
+                value.Add(v);
+                argumentList.DropOne();
             }
         }
     }

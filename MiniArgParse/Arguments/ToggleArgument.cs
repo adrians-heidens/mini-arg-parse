@@ -4,10 +4,10 @@ namespace MiniArgParse.Arguments
 {
     class ToggleArgument : ArgumentBase
     {
-        public override void Parse(int argIndex, List<string> argsList, Dictionary<string, dynamic> parsedArgs)
+        public override void Parse(ArgumentList argumentList, Dictionary<string, dynamic> parsedArgs)
         {
             string key = Name.TrimStart('-');
-            argsList.RemoveAt(argIndex);
+            argumentList.DropOne();
             parsedArgs[key] = true;
         }
     }

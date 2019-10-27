@@ -12,6 +12,6 @@ namespace MiniArgParse.Arguments
 
         public bool IsPositional => !Name.StartsWith("-");
 
-        public abstract void Parse(int argIndex, List<string> argsList, Dictionary<string, dynamic> parsedArgs);
+        public abstract void Parse(ArgumentList argumentList, Dictionary<string, dynamic> parsedArgs);
     }
 }
